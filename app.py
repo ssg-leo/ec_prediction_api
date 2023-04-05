@@ -1,8 +1,9 @@
 import joblib
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 import pandas as pd
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, Any
+from fastapi.responses import HTMLResponse
 
 app = FastAPI()
 
@@ -22,6 +23,21 @@ class InputData(BaseModel):
     remaining_lease: float
     price_index: Optional[float]
 
+    class Config:
+        schema_extra = {
+            "example": {
+                "x": 17172.45151,
+                "y": 35519.53147,
+                "area": 122.0,
+                "floor_range": "06-10",
+                "type_of_sale": "Resale",
+                "district": 22,
+                "district_name": "Boon Lay, Jurong, Tuas",
+                "remaining_lease": 72.31506849315069,
+                "price_index": 168.1
+            }
+        }
+
 
 def validate_input(input_data: InputData):
     # Add any necessary validation logic here
@@ -29,9 +45,20 @@ def validate_input(input_data: InputData):
 
 
 @app.get("/")
-def read_root():
-    return {"Hello": "World"}
+def index(request: Request) -> Any:
+    """Basic HTML response."""
+    body = (
+        "<html>"
+        "<body style='padding: 10px;'>"
+        "<h1>EC Price Prediction API</h1>"
+        "<div>"
+        "Check the docs: <a href='/docs'>here</a>"
+        "</div>"
+        "</body>"
+        "</html>"
+    )
 
+    return HTMLResponse(content=body)
 
 @app.post("/predict/")
 async def predict(input_data: InputData):
@@ -52,9 +79,7 @@ async def predict(input_data: InputData):
     # Compute SHAP values using the explainer
     shap_values = explainer(instance_transformed)
     feature_names = instance_transformed.columns
-    label_name = "prediction"
-    shap_values_dict = {}
-    label_name = "prediction"
+
     shap_values_dict = {}
     label_name = "prediction"
     shap_values_for_label = shap_values[0].values
