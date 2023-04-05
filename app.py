@@ -60,8 +60,8 @@ def index(request: Request) -> Any:
 
     return HTMLResponse(content=body)
 
-@app.post("/predict/")
-async def predict(input_data: InputData):
+@app.post("/predict")
+async def predict(input_data: InputData) -> dict:
     # Convert the input data to a DataFrame
     instance = pd.DataFrame([dict(input_data)])
     instance.columns = ['x', 'y', 'area', 'floor_range', 'type_of_sale', 'district',
